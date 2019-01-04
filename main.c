@@ -65,6 +65,14 @@ void main(void) {
     ADON = 1; // turn on the ADC
     ADCS0 = 1; // Fosc/8 ADC clock to 2us conversion an 4MHz Fosc
     ADFM = 1; // 2 most significant bits in ADRESH
+    
+    // comparator setup
+    TRISA1 = 1; // configure RA1 as an input
+    ANS1 = 1;   // turn on analog function
+    C1ON = 1;   // turn on comparator 1
+    C1R = 1;    // connect comparator + input to internal Vref
+    C1CH0 = 1;  // connect comparator - input to C12IN1 pin
+    
 
     unsigned short toggle_start = tick;
     unsigned short switch_start = tick;
@@ -72,14 +80,15 @@ void main(void) {
     unsigned char n = 0;
     unsigned char adc_state = 0;
     unsigned short adc_start = tick;
+    unsigned short comp_start = tick;
     
     for (;;) {
 
         // flash LED
         if (tick - toggle_start >= 1000) {
             toggle_start = tick;
-            RB0 ^= 1;
-            RB1 = ~RB0;
+            //RB0 ^= 1;
+            //RB1 = ~RB0;
         }
         // debounce switch and toggle LED
         if (tick - switch_start > 5) { // 10 ms check interval
@@ -132,6 +141,13 @@ void main(void) {
                     adc_state = 0;
                     break;
             }
+        }
+        
+        // process comparator 1
+        if (tick - comp_start >= 1) {
+            comp_start = tick;
+            RB0 = C1OUT;
+            RB1 = ~RB0;
         }
 
     }
