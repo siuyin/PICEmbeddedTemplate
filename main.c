@@ -72,9 +72,9 @@ void main(void) {
     unsigned char n = 0;
     unsigned char adc_state = 0;
     unsigned short adc_start = tick;
-    unsigned short now;
+    
     for (;;) {
-        now = tick;
+
         // flash LED
         if (tick - toggle_start >= 1000) {
             toggle_start = tick;
@@ -82,7 +82,7 @@ void main(void) {
             RB1 = ~RB0;
         }
         // debounce switch and toggle LED
-        if (now - switch_start > 5) { // 10 ms check interval
+        if (tick - switch_start > 5) { // 10 ms check interval
             switch_start = tick;
             switch (switch_state) {
                 case 0:
@@ -119,7 +119,7 @@ void main(void) {
             }
         }
         // process ADC
-        if (now - adc_start >= 1) {
+        if (tick - adc_start >= 1) {
             adc_start = tick;
             switch (adc_state) {
                 case 0:
@@ -133,12 +133,13 @@ void main(void) {
                     break;
             }
         }
-        //while (tick == now) {}
+
     }
 
 }
 
 void __interrupt() isr(void) {
+    // 1ms tick timer
     if (TMR0IF) {
         TMR0IF = 0;
         TMR0 = 131;
